@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "15.1.6",
+    "next": "15.5.18",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "gray-matter": "4.0.3",
@@ -36,7 +36,7 @@
     "autoprefixer": "10.4.20",
     "@tailwindcss/typography": "0.5.16",
     "eslint": "9.18.0",
-    "eslint-config-next": "15.1.6"
+    "eslint-config-next": "15.5.18"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["sharp", "unrs-resolver"]
