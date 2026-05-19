@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fafaf9;
+  --foreground: #1c1917;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv11", "ss01", "ss03";
+}
+
+/* Smooth focus rings */
+*:focus-visible {
+  outline: 2px solid theme("colors.accent.500");
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Citation pill */
+.citation {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: theme("colors.accent.50");
+  color: theme("colors.accent.700");
+  border: 1px solid theme("colors.accent.100");
+  border-radius: 9999px;
+  text-decoration: none;
+}
+
+.citation:hover {
+  background: theme("colors.accent.100");
+}
