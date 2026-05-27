@@ -1,0 +1,1440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Research → Strategy, without the leap of faith</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* PaperFlow Design Layout — tokens */
+  :root {
+    --primary:   #E65C00;
+    --primary-strong: #B84800;
+    --secondary: #FDFBF7;
+    --accent:    #FFB380;
+    --accent-soft: #FFE6D1;
+    --bg:        #FDFBF7;
+    --surface:   #F7F4EB;
+    --surface-2: #EFEBDE;
+    --text:      #111827;
+    --text-2:    #4B5563;
+    --text-3:    #9CA3AF;
+    --border:    #E5E7EB;
+    --border-soft: #EFEBE0;
+    --stage-bg:  #1A1614;
+
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --r-card: 16px;
+    --r-ctrl: 8px;
+    --r-pill: 9999px;
+
+    --s-base: 8px;
+    --s-gap: 16px;
+    --s-card: 24px;
+    --s-section: 80px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--stage-bg);
+    font-family: var(--sans);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  /* deck shell ----------------------------------------------------------- */
+  .deck {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--stage-bg);
+  }
+
+  .stage {
+    position: relative;
+    width: min(100vw, calc(100vh * 16 / 9));
+    height: min(100vh, calc(100vw * 9 / 16));
+    background: var(--bg);
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 56px 72px 72px;
+    display: none;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .slide.active { display: flex; }
+
+  /* chrome --------------------------------------------------------------- */
+  .progress {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 3px;
+    background: var(--surface-2);
+    z-index: 5;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--primary);
+    transition: width 200ms ease;
+  }
+
+  .chrome {
+    position: absolute;
+    left: 72px;
+    right: 72px;
+    bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  .chrome .marker { color: var(--primary); }
+
+  /* shared typography ---------------------------------------------------- */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  .display {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 64px;
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    max-width: 18ch;
+  }
+  .display .em {
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .display .mono {
+    font-family: var(--mono);
+    font-weight: 500;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+    font-size: 0.92em;
+  }
+
+  .lede {
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--text-2);
+    margin-top: 24px;
+    max-width: 38ch;
+  }
+
+  .body {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-2);
+    max-width: 56ch;
+  }
+  .body strong { color: var(--text); font-weight: 600; }
+  .body .em { color: var(--primary); font-weight: 600; }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--primary-strong);
+    border: 1px solid var(--accent);
+    border-radius: var(--r-pill);
+    text-decoration: none;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+  }
+  .pill::before {
+    content: '§';
+    font-family: var(--sans);
+    font-weight: 700;
+    opacity: 0.7;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 9px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-ctrl);
+    letter-spacing: 0.02em;
+  }
+
+  /* SLIDE 1 — title ------------------------------------------------------ */
+  .s-title {
+    justify-content: center;
+    padding: 72px 88px;
+    background:
+      radial-gradient(circle at 95% 8%, var(--accent-soft) 0%, transparent 40%),
+      var(--bg);
+  }
+  .s-title .corner {
+    position: absolute;
+    top: 56px; right: 72px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    letter-spacing: 0.06em;
+  }
+  .s-title .top-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.06em;
+    margin-bottom: 32px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .s-title .top-label::before {
+    content: '';
+    display: block;
+    width: 24px; height: 2px;
+    background: var(--primary);
+  }
+  .s-title h1 {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 88px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    max-width: 16ch;
+  }
+  .s-title h1 .em {
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .s-title h1 .arrow {
+    color: var(--primary);
+    font-weight: 500;
+  }
+  .s-title .sub {
+    margin-top: 32px;
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--text-2);
+    max-width: 44ch;
+    line-height: 1.5;
+  }
+  .s-title .meta {
+    position: absolute;
+    bottom: 64px;
+    left: 88px;
+    right: 88px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .s-title .meta .left { display: flex; flex-direction: column; gap: 4px; }
+  .s-title .meta strong { color: var(--text); font-weight: 600; }
+
+  /* SLIDE 2 — problem ---------------------------------------------------- */
+  .s-problem .display { font-size: 56px; max-width: 14ch; }
+  .s-problem .body { margin-top: 24px; font-size: 18px; max-width: 44ch; }
+  .s-problem .note {
+    margin-top: 20px;
+    font-family: var(--sans);
+    font-style: normal;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    max-width: 44ch;
+    padding-left: 16px;
+    border-left: 3px solid var(--primary);
+    line-height: 1.5;
+  }
+  .s-problem .drift {
+    position: absolute;
+    right: 72px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    padding: 28px;
+  }
+  .drift-head {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .drift-head .meta { color: var(--text-3); }
+  .drift-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--text-2);
+  }
+  .drift-row:last-of-type { margin-bottom: 0; }
+  .drift-row .week {
+    width: 64px;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .drift-row .bar {
+    flex: 1;
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+  }
+  .drift-row .bar-fill {
+    display: block;
+    height: 100%;
+    background: var(--primary);
+    border-radius: var(--r-pill);
+  }
+  .drift-row .pct { width: 36px; color: var(--text); font-weight: 600; text-align: right; }
+  .drift-cap {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-3);
+    margin-top: 18px;
+    line-height: 1.5;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  /* SLIDE 3 — principle -------------------------------------------------- */
+  .s-principle { justify-content: center; }
+  .s-principle .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    padding: 48px 56px;
+    max-width: 880px;
+    position: relative;
+  }
+  .s-principle .rule-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 32px; bottom: 32px;
+    width: 4px;
+    background: var(--primary);
+    border-radius: var(--r-pill);
+  }
+  .s-principle .quote {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    max-width: 22ch;
+  }
+  .s-principle .quote .em { color: var(--primary); font-weight: 600; }
+  .s-principle .annot {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .s-principle .annot .arrow {
+    color: var(--text-3);
+  }
+  .s-principle .feature-text {
+    margin-top: 28px;
+    font-family: var(--sans);
+    font-size: 16px;
+    color: var(--text-2);
+    max-width: 50ch;
+    line-height: 1.6;
+  }
+  .s-principle .feature-text .em { color: var(--text); font-weight: 600; }
+
+  /* SLIDE 4 — content model --------------------------------------------- */
+  .s-model .display { font-size: 48px; }
+  .s-model .map {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+    align-items: center;
+  }
+  .node {
+    text-align: center;
+    padding: 18px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    position: relative;
+    z-index: 2;
+  }
+  .node.source {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .node.bet {
+    border-color: var(--primary);
+    background: var(--bg);
+    box-shadow: 0 2px 0 var(--primary);
+  }
+  .node .label-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    margin-bottom: 8px;
+  }
+  .node.source .label-tag { color: var(--primary-strong); }
+  .node.bet .label-tag { color: var(--primary); }
+  .node .name {
+    font-family: var(--sans);
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .node .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
+  .edge {
+    position: relative;
+    height: 2px;
+    background: var(--border);
+  }
+  .edge::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: -3px;
+    width: 0; height: 0;
+    border-left: 7px solid var(--border);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+  .s-model .infra {
+    margin-top: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    padding: 24px 28px;
+    max-width: 720px;
+  }
+  .s-model .infra-body {
+    font-family: var(--sans);
+    font-size: 15px;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .s-model .infra-body .em { color: var(--text); font-weight: 600; }
+  .s-model .legend {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    gap: 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-2);
+    letter-spacing: 0.02em;
+  }
+  .legend .dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* SLIDE 5 — workflow --------------------------------------------------- */
+  .s-flow .display { font-size: 48px; max-width: 22ch; }
+  .s-flow .steps {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 880px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 20px;
+    align-items: center;
+    padding: 18px 22px;
+    background: var(--bg);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    transition: all 200ms ease;
+  }
+  .step .num {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .step .text {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .step .text code {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--surface);
+    color: var(--text);
+    padding: 3px 8px;
+    border-radius: var(--r-ctrl);
+    border: 1px solid var(--border-soft);
+  }
+  .step .text strong { font-weight: 600; color: var(--text); }
+  .step .out {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-3);
+    letter-spacing: 0.02em;
+  }
+  .step.highlight {
+    border-color: var(--primary);
+    background: var(--accent-soft);
+    box-shadow: 0 2px 0 var(--primary);
+  }
+  .step.highlight .text { color: var(--text); font-weight: 500; }
+  .step.highlight .out { color: var(--primary-strong); font-weight: 600; }
+  .step.highlight .em { color: var(--primary); font-weight: 600; }
+
+  /* SLIDE 6 — refuses to lie -------------------------------------------- */
+  .s-refuse.active {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    padding: 64px 72px 72px;
+  }
+  .s-refuse .display { font-size: 56px; }
+  .s-refuse .display .em { color: var(--primary); font-weight: 600; }
+  .s-refuse .body { margin-top: 20px; font-size: 17px; }
+  .s-refuse .body .em { color: var(--text); font-weight: 600; }
+  .s-refuse .feature-note {
+    margin-top: 16px;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .s-refuse .terminal {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(17,24,39,0.04);
+  }
+  .terminal-head {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .terminal-head .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border);
+  }
+  .terminal-head .label-tag {
+    margin-left: 8px;
+    text-transform: uppercase;
+  }
+  .terminal-line {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--text-2);
+  }
+  .terminal-line .ok { color: var(--primary); font-weight: 600; }
+  .terminal-line .dim { color: var(--text-3); }
+  .terminal-line .strike { color: var(--text-3); text-decoration: line-through; }
+  .terminal-line .heading {
+    color: var(--text);
+    font-weight: 700;
+    display: block;
+    margin-top: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 11px;
+  }
+  .terminal-line .first { margin-top: 0; }
+
+  /* SLIDE 7 — design decisions ------------------------------------------ */
+  .s-decisions .display { font-size: 48px; }
+  .s-decisions .cards {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    flex: 1;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+  }
+  .card .index {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .card .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .card h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.2;
+    color: var(--text);
+    letter-spacing: -0.015em;
+  }
+  .card p {
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+  .card p code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2px 6px;
+    border-radius: var(--r-ctrl);
+    border: 1px solid var(--border-soft);
+  }
+  .card .foot {
+    margin-top: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-3);
+    letter-spacing: 0.02em;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  /* SLIDE 8 — demo ------------------------------------------------------- */
+  .s-demo .display { font-size: 48px; max-width: 24ch; }
+  .s-demo .grid {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+    flex: 1;
+  }
+  .frame {
+    background: var(--bg);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+  }
+  .frame-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .frame-head .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border);
+  }
+  .frame-head .url {
+    margin-left: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-3);
+  }
+  .doc-title {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+  .doc-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .doc-body {
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+  .skel {
+    display: block;
+    background: var(--surface);
+    border-radius: 4px;
+    height: 8px;
+    margin: 8px 0;
+  }
+  .skel.w-90 { width: 90%; }
+  .skel.w-70 { width: 70%; }
+  .skel.w-60 { width: 60%; }
+  .skel.w-50 { width: 50%; }
+  .backlinks-panel {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: var(--r-card);
+    padding: 18px;
+    margin-top: 8px;
+  }
+  .backlinks-panel .ph {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--primary-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .backlink-item {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(230, 92, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .backlink-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .backlink-item .kind {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  /* SLIDE 9 — adopt ------------------------------------------------------ */
+  .s-adopt .display { font-size: 56px; }
+  .s-adopt .display .em { color: var(--primary); font-weight: 600; }
+  .s-adopt .terminal-block {
+    margin-top: 32px;
+    background: #1A1614;
+    border-radius: var(--r-card);
+    padding: 28px 32px;
+    max-width: 800px;
+    border: 1px solid #2A2522;
+  }
+  .s-adopt .terminal-block .terminal-head {
+    color: #6B6661;
+    border-bottom-color: #2A2522;
+  }
+  .s-adopt .terminal-block .terminal-head .dot { background: #3A332E; }
+  .s-adopt .terminal-block .terminal-line {
+    color: #D6D3D1;
+    font-size: 14px;
+    line-height: 2;
+  }
+  .s-adopt .terminal-block .terminal-line .prompt { color: var(--accent); font-weight: 600; }
+  .s-adopt .terminal-block .terminal-line .comment { color: #7A746E; font-style: normal; }
+  .s-adopt .pitch {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border-radius: var(--r-card);
+    border: 1px solid var(--border-soft);
+    max-width: 800px;
+  }
+  .s-adopt .pitch-icon {
+    width: 40px; height: 40px;
+    background: var(--primary);
+    color: white;
+    border-radius: var(--r-ctrl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .s-adopt .pitch-text {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.4;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .s-adopt .pitch-text .em { color: var(--primary); font-weight: 600; }
+
+  /* SLIDE 10 — what's next ---------------------------------------------- */
+  .s-next .display { font-size: 56px; }
+  .s-next .display .em { color: var(--primary); font-weight: 600; }
+  .s-next .nexts {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 920px;
+  }
+  .next-item {
+    padding: 22px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-card);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .next-item .when {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 3px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--primary);
+    background: var(--accent-soft);
+    border-radius: var(--r-pill);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .next-item .what {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .next-item .why {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .next-item .why code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2px 6px;
+    border-radius: var(--r-ctrl);
+    border: 1px solid var(--border-soft);
+  }
+  .open-q {
+    margin-top: 24px;
+    padding: 24px 28px;
+    background: var(--primary);
+    border-radius: var(--r-card);
+    max-width: 920px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .open-q .ph {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--r-pill);
+    flex-shrink: 0;
+  }
+  .open-q p {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  /* nav hint ------------------------------------------------------------- */
+  .nav-hint {
+    position: fixed;
+    bottom: 14px;
+    right: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: #7A746E;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+    z-index: 100;
+  }
+  .nav-hint kbd {
+    background: #2A2522;
+    color: #D6D3D1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+  <div class="stage" id="stage">
+
+    <!-- SLIDE 1 — TITLE -->
+    <section class="slide active s-title" data-slide="1">
+      <div class="progress"><div class="progress-bar" style="width:10%"></div></div>
+      <div class="corner">01 / 10</div>
+      <div class="top-label">A WORKING NOTE ON RESEARCH-DRIVEN STRATEGY</div>
+      <h1>Research <span class="arrow">→</span> Strategy, without the <span class="em">leap of faith</span>.</h1>
+      <p class="sub">How I built a workspace that refuses to display ungrounded strategy — and how you could, too.</p>
+      <div class="meta">
+        <div class="left">
+          <strong>John Iseghohi</strong>
+          <span>Agent Studio · Algolia</span>
+        </div>
+        <div>27 May 2026 · ~12 min</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2 — PROBLEM -->
+    <section class="slide s-problem" data-slide="2">
+      <div class="progress"><div class="progress-bar" style="width:20%"></div></div>
+      <div class="eyebrow">01 · The problem</div>
+      <h2 class="display">Strategy and research live in different orbits.</h2>
+      <p class="body">Customer interviews live in Notion. PDFs sit on Drive. Quotes scatter across Slack threads. By week three, <strong>"we heard from users that…"</strong> becomes folklore — and no one can point back to the source.</p>
+      <p class="note">For Agent Studio specifically: if I can't trace a claim, I can't defend the bet I'm making on top of it.</p>
+
+      <div class="drift">
+        <div class="drift-head">
+          <span>CITATION DRIFT</span>
+          <span class="meta">% TRACEABLE</span>
+        </div>
+        <div class="drift-row">
+          <span class="week">WK 1</span>
+          <span class="bar"><span class="bar-fill" style="width:95%"></span></span>
+          <span class="pct">95%</span>
+        </div>
+        <div class="drift-row">
+          <span class="week">WK 2</span>
+          <span class="bar"><span class="bar-fill" style="width:72%"></span></span>
+          <span class="pct">72%</span>
+        </div>
+        <div class="drift-row">
+          <span class="week">WK 3</span>
+          <span class="bar"><span class="bar-fill" style="width:48%"></span></span>
+          <span class="pct">48%</span>
+        </div>
+        <div class="drift-row">
+          <span class="week">WK 6</span>
+          <span class="bar"><span class="bar-fill" style="width:22%"></span></span>
+          <span class="pct">22%</span>
+        </div>
+        <p class="drift-cap">Claims you can still trace back to a source, by week. An illustration, not a study.</p>
+      </div>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">02 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 — PRINCIPLE -->
+    <section class="slide s-principle" data-slide="3">
+      <div class="progress"><div class="progress-bar" style="width:30%"></div></div>
+      <div class="eyebrow">02 · The design principle</div>
+
+      <div class="rule-card">
+        <p class="quote">Every non-source artifact must <span class="em">cite</span> the research it was grounded in.</p>
+        <div class="annot">
+          <span>ONE LOAD-BEARING RULE</span>
+          <span class="arrow">→</span>
+          <span>SURFACED AS</span>
+          <a href="#" class="pill">interviews/p3-merchandiser.md</a>
+        </div>
+      </div>
+
+      <p class="feature-text">The reader <span class="em">refuses</span> to display ungrounded strategy. Like Figma's auto-layout or Git's atomic commits — the friction <span class="em">is</span> the feature.</p>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">03 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4 — CONTENT MODEL -->
+    <section class="slide s-model" data-slide="4">
+      <div class="progress"><div class="progress-bar" style="width:40%"></div></div>
+      <div class="eyebrow">03 · The content model</div>
+      <h2 class="display">The schema <span class="em">is</span> the product.</h2>
+
+      <div class="map">
+        <div class="node source">
+          <div class="label-tag">SOURCE</div>
+          <div class="name">Research</div>
+          <div class="count">14 docs</div>
+        </div>
+        <div class="edge"></div>
+        <div class="node">
+          <div class="label-tag">FINDING</div>
+          <div class="name">Discrete claim</div>
+          <div class="count">42</div>
+        </div>
+        <div class="edge"></div>
+        <div class="node">
+          <div class="label-tag">IMPLICATION</div>
+          <div class="name">What it means</div>
+          <div class="count">18</div>
+        </div>
+        <div class="edge"></div>
+        <div class="node bet">
+          <div class="label-tag">HYPOTHESIS / IDEA</div>
+          <div class="name">Testable bet</div>
+          <div class="count">9</div>
+        </div>
+      </div>
+
+      <div class="infra">
+        <p class="infra-body">Each node is a <span class="tag">markdown</span> file with <span class="tag">YAML frontmatter</span>. Edges are citations and wikilinks. Every source page renders <span class="em">reverse backlinks</span> — every downstream artifact, automatically.</p>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--accent)"></span>Source-tier</span>
+          <span><span class="dot" style="background:var(--border)"></span>Derived (must cite)</span>
+          <span><span class="dot" style="background:var(--primary)"></span>Bet — testable</span>
+        </div>
+      </div>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">04 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5 — WORKFLOW -->
+    <section class="slide s-flow" data-slide="5">
+      <div class="progress"><div class="progress-bar" style="width:50%"></div></div>
+      <div class="eyebrow">04 · The workflow</div>
+      <h2 class="display"><span class="mono">/research-strategy</span>, end-to-end.</h2>
+
+      <div class="steps">
+        <div class="step">
+          <span class="num">01</span>
+          <span class="text">Paste a URL — <code>/research-strategy https://…</code></span>
+          <span class="out">→ ingest</span>
+        </div>
+        <div class="step">
+          <span class="num">02</span>
+          <span class="text">Skill writes <code>source.md</code> — full text plus metadata</span>
+          <span class="out">→ sources/</span>
+        </div>
+        <div class="step">
+          <span class="num">03</span>
+          <span class="text">Generates summary, findings (each with a <strong>verbatim quote</strong>), implications</span>
+          <span class="out">→ findings/ + summaries/</span>
+        </div>
+        <div class="step">
+          <span class="num">04</span>
+          <span class="text">Drafts hypotheses, ideas, design goals — only if they can cite</span>
+          <span class="out">→ hypotheses/</span>
+        </div>
+        <div class="step highlight">
+          <span class="num">05</span>
+          <span class="text">Reports back: counts, sharpest implications, and ideas it <span class="em">refused</span> to commit</span>
+          <span class="out">↩ THE MAGIC MOMENT</span>
+        </div>
+      </div>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">05 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6 — REFUSES TO LIE -->
+    <section class="slide s-refuse" data-slide="6">
+      <div class="progress"><div class="progress-bar" style="width:60%"></div></div>
+
+      <div>
+        <div class="eyebrow">05 · The most important slide</div>
+        <h2 class="display">The tool <span class="em">refuses to lie</span>.</h2>
+        <p class="body">If an idea can't cite a source, the skill <span class="em">won't write it to disk</span>. It surfaces it as ungrounded — so I can decide whether to investigate, not whether to remember.</p>
+        <p class="feature-note">This is the part that keeps the workspace honest at month three, month six, month twelve.</p>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-head">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="label-tag">/research-strategy · run report</span>
+        </div>
+        <div class="terminal-line">
+          <span class="heading first">COMMITTED</span>
+          <span class="ok">✓</span> 6 findings · all cited<br>
+          <span class="ok">✓</span> 3 implications · linked to Track 2<br>
+          <span class="ok">✓</span> 2 hypotheses · confidence 3 &amp; 4
+          <span class="heading">CONSIDERED, NOT COMMITTED</span>
+          <span class="strike">— "agents should auto-tune ranking weights"</span><br>
+          <span class="dim" style="padding-left:14px">no source citation — surfaced for you</span><br>
+          <span class="strike">— "marketplaces need a different eval mode"</span><br>
+          <span class="dim" style="padding-left:14px">implied, not stated in source</span>
+        </div>
+      </div>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">06 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 7 — DESIGN DECISIONS -->
+    <section class="slide s-decisions" data-slide="7">
+      <div class="progress"><div class="progress-bar" style="width:70%"></div></div>
+      <div class="eyebrow">06 · Three decisions worth calling out</div>
+      <h2 class="display">Constraints that <span class="em">earn</span> their keep.</h2>
+
+      <div class="cards">
+        <div class="card">
+          <span class="index">01</span>
+          <span class="badge">STORAGE</span>
+          <h3>Markdown-first. No database.</h3>
+          <p>Content <strong>is</strong> the source of truth. The app is just a reader. Portable, diffable, grep-able, AI-legible — and survives if I never touch the reader again.</p>
+          <span class="foot">→ content/ on disk</span>
+        </div>
+        <div class="card">
+          <span class="index">02</span>
+          <span class="badge">STRUCTURE</span>
+          <h3>Wikilinks over folder hierarchy.</h3>
+          <p>Knowledge graphs beat trees for research. <code>[[h-eval-determinism]]</code> resolves anywhere — no path memorisation, no broken links on rename.</p>
+          <span class="foot">→ src/lib/wikilinks.ts</span>
+        </div>
+        <div class="card">
+          <span class="index">03</span>
+          <span class="badge">SYSTEM</span>
+          <h3>Built on Satellite.</h3>
+          <p>Reused our own design system end-to-end. The meta-point: a tool for Algolia thinkers should look like an Algolia surface. Plus, free dark mode.</p>
+          <span class="foot">→ @algolia/satellite</span>
+        </div>
+      </div>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">07 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 8 — DEMO -->
+    <section class="slide s-demo" data-slide="8">
+      <div class="progress"><div class="progress-bar" style="width:80%"></div></div>
+      <div class="eyebrow">07 · A walk-through</div>
+      <h2 class="display">Live in the browser. <span class="em">Cite, click, follow.</span></h2>
+
+      <div class="grid">
+        <div class="frame">
+          <div class="frame-head">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="url">localhost:3000 / implications / eval-determinism</span>
+          </div>
+          <div class="doc-meta">IMPLICATION · CONFIDENCE 4 · TRACK 2</div>
+          <div class="doc-title">A/B test cohorts can't compare a non-deterministic system to a deterministic one.</div>
+          <div class="doc-body">
+            <span class="skel w-90"></span>
+            <span class="skel w-70"></span>
+            <span class="skel w-60"></span>
+            <p style="margin-top:14px;font-size:13px;color:var(--text-2)">Grounded in <a href="#" class="pill">moo-merchandiser-interview-p3</a> &nbsp; <a href="#" class="pill">algolia-eval-primitives</a></p>
+            <span class="skel w-90" style="margin-top:14px"></span>
+            <span class="skel w-50"></span>
+          </div>
+        </div>
+
+        <div class="frame">
+          <div class="frame-head">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="url">source.md</span>
+          </div>
+          <div class="doc-meta">SOURCE · MERCHANDISER INTERVIEW</div>
+          <div class="doc-title" style="font-size:17px">"We can't tell if it's better — the answer changes every time."</div>
+          <div class="backlinks-panel">
+            <div class="ph">↩ Artifacts grounded in this</div>
+            <div class="backlink-item"><span class="kind">IMP</span><span>Eval-determinism breakdown</span></div>
+            <div class="backlink-item"><span class="kind">HYP</span><span>Confidence intervals beat point scores</span></div>
+            <div class="backlink-item"><span class="kind">IDEA</span><span>"Always-shadow" eval mode</span></div>
+            <div class="backlink-item"><span class="kind">GOAL</span><span>Surface variance, not just deltas</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">08 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 9 — ADOPT -->
+    <section class="slide s-adopt" data-slide="9">
+      <div class="progress"><div class="progress-bar" style="width:90%"></div></div>
+      <div class="eyebrow">08 · How you'd use it</div>
+      <h2 class="display">Three commands. <span class="em">Then ship.</span></h2>
+
+      <div class="terminal-block">
+        <div class="terminal-head">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="label-tag" style="color:#7A746E">~/your-project</span>
+        </div>
+        <div class="terminal-line">
+          <span class="prompt">$</span> git clone &lt;this repo&gt; my-research-workspace<br>
+          <span class="prompt">$</span> cd my-research-workspace &amp;&amp; pnpm install &amp;&amp; pnpm dev<br>
+          <span class="comment"># in Claude Code:</span><br>
+          <span class="prompt">$</span> /research-strategy https://&lt;your-research-doc&gt;<br>
+          <span class="comment"># … then write your own STRATEGY.md, cite as you go.</span>
+        </div>
+      </div>
+
+      <div class="pitch">
+        <div class="pitch-icon">→</div>
+        <div class="pitch-text">Your team's research <span class="em">compounds</span>, instead of evaporating week by week.</div>
+      </div>
+
+      <div class="chrome">
+        <span>RESEARCH → STRATEGY</span>
+        <span class="marker">09 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 10 — WHAT'S NEXT -->
+    <section class="slide s-next" data-slide="10">
+      <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+      <div class="eyebrow">09 · What's next</div>
+      <h2 class="display">Where I'd take it <span class="em">next.</span></h2>
+
+      <div class="nexts">
+        <div class="next-item">
+          <span class="when">NEXT</span>
+          <span class="what">Confidence decay.</span>
+          <span class="why">Hypotheses age. A bet from research six months old should look different from one made last week — surface that visually.</span>
+        </div>
+        <div class="next-item">
+          <span class="when">SOON</span>
+          <span class="what">Cross-project citation graph.</span>
+          <span class="why">If two strategy docs both cite the same finding, link them. Compounding becomes legible across teams, not just within one workspace.</span>
+        </div>
+        <div class="next-item">
+          <span class="when">EXPLORING</span>
+          <span class="what">Skill packaging.</span>
+          <span class="why">Make <code>/research-strategy</code> portable — drop it into any markdown repo, not just this one.</span>
+        </div>
+        <div class="next-item">
+          <span class="when">LATER</span>
+          <span class="what">Designer-facing capture.</span>
+          <span class="why">Surface ungrounded ideas as a worklist designers can claim — turn refusal into next-research-question.</span>
+        </div>
+      </div>
+
+      <div class="open-q">
+        <div class="ph">OPEN QUESTION</div>
+        <p>Should this ship as a template repo, a Vercel starter, or an internal package?</p>
+      </div>
+
+      <div class="chrome">
+        <span style="color:var(--primary);font-weight:600">THANK YOU · jayjay.iseghohi@algolia.com</span>
+        <span class="marker">10 / 10</span>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="nav-hint">
+  <kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen · <kbd>1-9</kbd> jump
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let current = 0;
+
+  function show(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+    window.location.hash = `s${current + 1}`;
+  }
+
+  function readHash() {
+    const m = window.location.hash.match(/^#s(\d+)$/);
+    if (m) {
+      const n = parseInt(m[1], 10) - 1;
+      if (n >= 0 && n < slides.length) {
+        current = n;
+        slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+      }
+    }
+  }
+  window.addEventListener('hashchange', readHash);
+  readHash();
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      show(current + 1); e.preventDefault();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      show(current - 1); e.preventDefault();
+    } else if (e.key === 'Home') {
+      show(0); e.preventDefault();
+    } else if (e.key === 'End') {
+      show(slides.length - 1); e.preventDefault();
+    } else if (e.key >= '1' && e.key <= '9') {
+      show(parseInt(e.key, 10) - 1);
+    } else if (e.key === '0') {
+      show(9);
+    } else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  });
+
+  document.getElementById('stage').addEventListener('click', (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (x > rect.width / 2) show(current + 1);
+    else show(current - 1);
+  });
+</script>
+
+</body>
+</html>

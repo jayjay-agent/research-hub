@@ -1,0 +1,13 @@
+{
+  "source_mockup": null,
+  "source_plan": null,
+  "mode": "freeform",
+  "html_file": "/Users/john.iseghohi/.gstack/projects/Research/designs/research-strategy-deck-20260527/finalized.html",
+  "pretext_tier": "removed-not-needed-for-fixed-aspect-deck",
+  "framework": "vanilla",
+  "iterations": 1,
+  "date": "2026-05-27",
+  "screen": "research-strategy-deck",
+  "branch": "main",
+  "notes": "10-slide deck, 16:9, keyboard nav (arrows/space/1-9/F), hash routing (#sN). Uses the workspace's warm ink + orange palette from tailwind.config.ts."
+}
