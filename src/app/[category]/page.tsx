@@ -21,12 +21,20 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const meta = CATEGORY_META[cat];
   const allDocs = loadCategory(cat);
 
-  const activeSlug = typeof source === "string" && source.length > 0 ? source : null;
-  const docs = activeSlug
-    ? allDocs.filter((d) =>
-        (d.frontmatter.citations ?? []).some((c) => c.source === activeSlug),
-      )
-    : allDocs;
+  const sourceParam = Array.isArray(source) ? source.join(",") : source;
+  const selectedSlugs =
+    typeof sourceParam === "string" && sourceParam.length > 0
+      ? sourceParam.split(",").filter(Boolean)
+      : [];
+
+  const docs =
+    selectedSlugs.length > 0
+      ? allDocs.filter((d) =>
+          (d.frontmatter.citations ?? []).some((c) =>
+            selectedSlugs.includes(c.source),
+          ),
+        )
+      : allDocs;
 
   const showFilter = cat !== "sources";
   const sources = showFilter ? sourcesInCategory(cat) : [];
@@ -44,7 +52,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       </header>
 
       {showFilter && sources.length >= 2 && (
-        <SourceFilter category={cat} sources={sources} activeSlug={activeSlug} />
+        <SourceFilter category={cat} sources={sources} selectedSlugs={selectedSlugs} />
       )}
 
       {allDocs.length === 0 ? (
@@ -56,13 +64,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </div>
       ) : docs.length === 0 ? (
         <div className="rounded-lg border border-dashed border-ink-300 bg-ink-50 p-6 text-sm text-ink-600">
-          No {meta.title.toLowerCase()} cite that source. Try a different filter.
+          No {meta.title.toLowerCase()} cite the selected{" "}
+          {selectedSlugs.length === 1 ? "source" : "sources"}. Try a different filter.
         </div>
       ) : (
         <>
           <div className="text-xs text-ink-500">
             {docs.length} {docs.length === 1 ? "artifact" : "artifacts"}
-            {activeSlug && ` cite the selected source`}
+            {selectedSlugs.length === 1 && ` cite the selected source`}
+            {selectedSlugs.length > 1 && ` cite any of ${selectedSlugs.length} sources`}
           </div>
           <div className="space-y-3">
             {docs.map((d) => (
