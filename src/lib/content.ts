@@ -138,26 +138,35 @@ export function findReferencedBy(slug: string): ContentDoc[] {
 
 /**
  * Distinct sources cited by docs in a category, sorted by source publication
- * date (newest first). Used by the source-filter pills on category pages.
+ * date (newest first). Each entry also carries `count` — the number of docs
+ * in the category that cite it — so the combobox can show signal density
+ * without forcing the user to filter and read the result.
+ *
+ * Used by the source-filter combobox on category pages.
  */
 export function sourcesInCategory(
   category: ContentCategory,
-): { slug: string; title: string; date?: string }[] {
+): { slug: string; title: string; date?: string; author?: string; count: number }[] {
   const docs = loadCategory(category);
-  const slugs = new Set<string>();
+  const counts = new Map<string, number>();
   for (const d of docs) {
+    const seen = new Set<string>();
     for (const c of d.frontmatter.citations ?? []) {
-      slugs.add(c.source);
+      if (seen.has(c.source)) continue;
+      seen.add(c.source);
+      counts.set(c.source, (counts.get(c.source) ?? 0) + 1);
     }
   }
   const sources = loadCategory("sources");
-  const out: { slug: string; title: string; date?: string }[] = [];
-  for (const slug of slugs) {
+  const out: { slug: string; title: string; date?: string; author?: string; count: number }[] = [];
+  for (const [slug, count] of counts) {
     const src = sources.find((s) => s.slug === slug);
     out.push({
       slug,
       title: src?.frontmatter.title ?? slug,
       date: src?.frontmatter.date,
+      author: src?.frontmatter.author,
+      count,
     });
   }
   out.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
